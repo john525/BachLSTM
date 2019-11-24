@@ -18,5 +18,8 @@ Then to run the project, do
 python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
-python assignment.py
+python assignment.py [BIG/SMALL]
 ```
+
+With the flag "BIG" the dataset will contain at least 1.6m tokens, like the researcher's Bach corpus.
+With the flag "SMALL" the dataset will only load 1600 tokens (for local testing).
