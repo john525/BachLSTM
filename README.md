@@ -12,3 +12,11 @@ To download these files, cd to the 'data' directory and run
 chmod +x get_data.sh
 ./get_data.sh
 ```
+
+Then to run the project, do
+```
+python -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+python assignment.py
+```
