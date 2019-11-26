@@ -22,10 +22,8 @@ def load_data(path_to_midi_files, all_data=True):
     num_tokens = 0
     songs = []
 
-    word_limit = 1.6e6
     if all_data == False:
-        word_limit = 1.6e3
-    num_words = 0
+        files = files[:10] # TODO: change limit
 
     for i,fname in enumerate(files):
         print('reading file %d out of %d...' % (i+1, len(files)))
@@ -39,12 +37,7 @@ def load_data(path_to_midi_files, all_data=True):
         # Convert midi song to a vector
         song_vector = []
         for channel in midi_file.tracks:
-            song_vector = [event for event in channel.events] # TODO: represent each event as a one-hot
+            song_vector = [event for event in channel.events] # TODO: represent each event as a one-hot, remove metadata events
         songs.append(song_vector)
-        num_words += len(song_vector)
-
-
-        if num_words >= word_limit:
-            break # Huang and Wu's dataset had 1.6 million words
 
     return songs
