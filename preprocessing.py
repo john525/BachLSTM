@@ -36,7 +36,6 @@ def load_data(path_to_midi_files, all_data=True):
     num_words = 0
 
     for i,fname in enumerate(files):
-        print('loading file %d out of %d...' % (i+1, len(files)))
         vector_track = []
 
         midi_file = midi.MidiFile()
