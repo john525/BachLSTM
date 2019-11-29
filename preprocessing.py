@@ -23,7 +23,7 @@ def load_data(path_to_midi_files, all_data=True):
     songs = []
 
     if all_data == False:
-        files = files[:10] # TODO: change limit
+        files = files[:10]
 
     for i,fname in enumerate(files):
         print('reading file %d out of %d...' % (i+1, len(files)))
