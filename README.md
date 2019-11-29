@@ -21,5 +21,5 @@ pip install -r requirements.txt
 python assignment.py [BIG/SMALL]
 ```
 
-With the flag "BIG" the dataset will contain at least 1.6m tokens, like the researcher's Bach corpus.
-With the flag "SMALL" the dataset will only load 1600 tokens (for local testing).
+With the flag "BIG" the dataset will load all available MIDI files.
+With the flag "SMALL" the dataset will only load the first 10 files (for faster local testing).
