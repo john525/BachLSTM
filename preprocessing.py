@@ -3,13 +3,15 @@ import tensorflow as tf
 import os
 from music21 import midi as midi
 
-MAX_NOTE = 128
+# MAX_DURATION = 200
+MAX_PITCH = 128
 MAX_CHANNEL = 16
 MAX_VELOCITY = 128 # TODO: check
 
-def note_to_vec(note, channel, velocity):
-    one_hot = np.zeros((MAX_NOTE, MAX_CHANNEL, MAX_VELOCITY))
-    idx = int(note), int(channel), int(velocity)
+def vectorize_event(evt):
+    one_hot = np.zeros((2, MAX_PITCH, MAX_CHANNEL, MAX_VELOCITY))
+    msg_type = int(evt.type == 'NOTE_ON')
+    idx = msg_type, int(evt.pitch), int(evt.channel), int(evt.velocity)
     one_hot[idx] = 1.0
     return one_hot
 
@@ -35,9 +37,12 @@ def load_data(path_to_midi_files, all_data=True):
         # TODO: normalize ticks per beat
 
         # Convert midi song to a vector
-        song_vector = []
+        song_vector = [] # TODO: represent each event as a one-hot, remove metadata events
         for channel in midi_file.tracks:
-            song_vector = [event for event in channel.events] # TODO: represent each event as a one-hot, remove metadata events
+            for event in channel.events:
+                if event.type in 'NOTE_ON NOTE_OFF':
+                    vec = vectorize_event(event)
+                    song_vector.append(vec)
         songs.append(song_vector)
 
     return songs
