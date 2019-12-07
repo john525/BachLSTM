@@ -2,26 +2,34 @@ import tensorflow as tf
 
 class Model(tf.keras.Model):
     def __init__(self, vocab_size, output_size):
-        super(Model, self)
+        super(Model, self).__init__()
 
         # Define hyperparameters
+        self.vocab_size = vocab_size
+        self.output_size = output_size
+        self.batch_size = 64
 
         # Define layers
 
         # Define optimizer
-        model = tf.keras.Sequential()
         # TODO: fill out dimensions here
-        model.add(tf.keras.layers.Embedding(input_dim = self.vocab_size, output_dim = self.output_size))
-        model.add(tf.keras.layers.LSTM(units = 100))
-        model.add(tf.keras.layers.LSTM(units = 100))
-        model.add(tf.keras.layers.Dense(units = self.vocab_size, activation = "softmax"))
-        self.model = model
-        self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
+        self.embedding = tf.keras.layers.Embedding(input_dim = self.vocab_size, output_dim = self.output_size)
+        self.lstm1 = tf.keras.layers.LSTM(units = 100)
+        # self.lstm2 = tf.keras.layers.LSTM(units = 100)
+        self.dense = tf.keras.layers.Dense(units = self.vocab_size, activation = "softmax")
+
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
 
-    @tf.function
+    # @tf.function
     def call(self, inputs):
-        return self.model(inputs)
+        print(inputs)
+        print(inputs.shape)
+        x = self.embedding(inputs)
+        x = self.lstm1(x)
+        # x = self.lstm2(x)
+        x = self.dense(x)
+        return x
 
-    def loss(self, probabilites, labels):
-        return tf.reduce_sum(self.loss(probabilities, labels))
+    def loss(self, probabilities, labels):
+        labels = tf.reshape(labels, (self.batch_size, 428))
+        return tf.reduce_sum(tf.keras.losses.sparse_categorical_crossentropy(probabilities, labels))

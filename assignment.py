@@ -27,7 +27,7 @@ def train(model, data, labels):
 
         print(' (%d:%d) batch %02d/%02d, loss=%07.2F' % (minutes, seconds, i / model.batch_size + 1, len(data) / model.batch_size, loss))
         grad = g.gradient(loss, model.trainable_variables)
-        model.opt.apply_gradients(zip(grad, model.trainable_variables))
+        model.optimizer.apply_gradients(zip(grad, model.trainable_variables))
 
 def test(model, data, labels):
     total_loss = 0.0
@@ -62,7 +62,7 @@ def main():
     elif sys.argv[1] == "SMALL":
         data, token_dict = load_data('./data/jsbach.net/midi/', all_data=False)
 
-    m = Model(len(token_dict))
+    m = Model(len(token_dict), len(token_dict))
 
     all_songs_data = tf.concat(data, axis=0)
     test_train_cutoff = int(len(all_songs_data) * 0.9)
