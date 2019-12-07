@@ -25,7 +25,7 @@ def train(model, data, labels):
         minutes = int(seconds / 60)
         seconds %= 60
 
-        print('batch %02d/%02d: loss=%07.2F, t=%d:%d' % (i / model.batch_size + 1, len(data) / model.batch_size, loss, minutes, seconds))
+        print(' (%d:%d) batch %02d/%02d, loss=%07.2F' % (minutes, seconds, i / model.batch_size + 1, len(data) / model.batch_size, loss))
         grad = g.gradient(loss, model.trainable_variables)
         model.opt.apply_gradients(zip(grad, model.trainable_variables))
 
@@ -48,7 +48,6 @@ def test(model, data, labels):
         n += 1.0
     print('Test Loss: %f' % total_loss)
     print('Test Perp: %f' % tf.exp(total_loss / n))
-
 
 def main():
     small_dataset = False
