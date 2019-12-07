@@ -10,8 +10,7 @@ MAX_VELOCITY = 128 # TODO: check
 
 def tokenize_event(evt, token_dict):
     one_hot = np.zeros((2, MAX_PITCH, MAX_CHANNEL, MAX_VELOCITY))
-    msg_type = int(evt.type == 'NOTE_ON')
-    idx = msg_type, int(evt.pitch), int(evt.channel), int(evt.velocity)
+    idx = evt.type, int(evt.pitch), int(evt.channel), int(evt.velocity)
     if idx not in token_dict:
         token_dict[idx] = len(token_dict)
     return token_dict[idx]
@@ -28,7 +27,7 @@ def load_data(path_to_midi_files, all_data=True):
     token_dict = {}
 
     if all_data == False:
-        files = files[:10]
+        files = files[:5]
 
     print()
     for i,fname in enumerate(files):
@@ -51,5 +50,5 @@ def load_data(path_to_midi_files, all_data=True):
     print('\nUnique Tokens: %d' % len(token_dict))
     for i in range(len(songs)):
         songs[i] = tf.one_hot(songs[i], len(token_dict))
-        
+
     return songs, {token_dict[data]: data for data in token_dict}
