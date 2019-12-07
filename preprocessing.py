@@ -48,7 +48,9 @@ def load_data(path_to_midi_files, all_data=True):
         songs.append(song_vector)
 
     print('\nUnique Tokens: %d' % len(token_dict))
+    labels = []
     for i in range(len(songs)):
+        labels.append([x for x in songs[i]])
         songs[i] = tf.one_hot(songs[i], len(token_dict))
 
-    return songs, {token_dict[data]: data for data in token_dict}
+    return songs, labels, {token_dict[data]: data for data in token_dict}
