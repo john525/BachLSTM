@@ -1,5 +1,5 @@
 from model import Model
-from preprocessing import load_data
+from preprocessing import MidiLoader
 from postprocessing import unload_data
 import sys
 import tensorflow as tf
@@ -64,23 +64,45 @@ def main():
         exit()
 
     print('=== Bach LSTM Generator (nwee, jlhota) ===')
+    full_dataset = False
+    midi_loader = MidiLoader()
+    m = Model()
+
     if sys.argv[1] == "BIG":
-        data, labels, token_dict = load_data('./data/jsbach.net/midi/', all_data=True)
+        full_dataset = True
     elif sys.argv[1] == "SMALL":
-        data, labels, token_dict = load_data('./data/jsbach.net/midi/', all_data=False)
+        data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=False)
 
-    m = Model(len(token_dict), len(token_dict))
+    if not full_dataset:
+        all_songs_data = tf.concat(data, axis=0)
+        all_songs_labels = tf.concat(labels, axis=0)
+        test_train_cutoff = int(len(all_songs_data) * 0.9)
+        train_data = all_songs_data[:test_train_cutoff]
+        test_data = all_songs_data[test_train_cutoff:]
+        train_labels = all_songs_labels[:test_train_cutoff]
+        test_labels = all_songs_labels[test_train_cutoff:]
 
-    all_songs_data = tf.concat(data, axis=0)
-    all_songs_labels = tf.concat(labels, axis=0)
-    test_train_cutoff = int(len(all_songs_data) * 0.9)
-    train_data = all_songs_data[:test_train_cutoff]
-    test_data = all_songs_data[test_train_cutoff:]
-    train_labels = all_songs_labels[:test_train_cutoff]
-    test_labels = all_songs_labels[test_train_cutoff:]
+        train(m, train_data[:-1], train_labels[1:])
+    else:
+        while True:
+            data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
-    print('=== Training ===')
-    train(m, train_data[:-1], train_labels[1:])
+            if data == None:
+                break
+
+            all_songs_data = tf.concat(data, axis=0)
+            all_songs_labels = tf.concat(labels, axis=0)
+            test_train_cutoff = int(len(all_songs_data) * 0.9)
+            train_data = all_songs_data[:test_train_cutoff]
+            test_data = all_songs_data[test_train_cutoff:]
+            train_labels = all_songs_labels[:test_train_cutoff]
+            test_labels = all_songs_labels[test_train_cutoff:]
+
+            train(m, train_data[:-1], train_labels[1:])
+
+
+        print('=== Training ===')
+
 
     print('=== Testing ===')
     test(m, test_data[:-1], test_labels[1:])

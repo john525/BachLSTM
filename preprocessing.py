@@ -8,49 +8,57 @@ MAX_PITCH = 128
 MAX_CHANNEL = 16
 MAX_VELOCITY = 128 # TODO: check
 
-def tokenize_event(evt, token_dict):
-    one_hot = np.zeros((2, MAX_PITCH, MAX_CHANNEL, MAX_VELOCITY))
-    idx = evt.type, int(evt.pitch), int(evt.channel), int(evt.velocity)
-    if idx not in token_dict:
-        token_dict[idx] = len(token_dict)
-    return token_dict[idx]
+class MidiLoader:
+    def __init__(self):
+        self.file_index = 0
 
-def load_data(path_to_midi_files, all_data=True):
-    """
-    path_to_midi_files - path to the dataset containing .mid files
-    returns - a list of note vectors, and a token dictionary
-    """
-    files = [fname for fname in os.listdir(path_to_midi_files) if fname not in 'sankey bwv988 bwv232 leipzig']
-    num_tokens = 0
+    def tokenize_event(self, evt, token_dict):
+        one_hot = np.zeros((2, MAX_PITCH, MAX_CHANNEL, MAX_VELOCITY))
+        idx = evt.type, int(evt.pitch), int(evt.channel), int(evt.velocity)
+        if idx not in token_dict:
+            token_dict[idx] = len(token_dict)
+        return token_dict[idx]
 
-    songs = []
-    token_dict = {}
+    def load_data(self, path_to_midi_files, all_data=True):
+        """
+        path_to_midi_files - path to the dataset containing .mid files
+        returns - a list of note vectors, and a token dictionary
+        """
+        files = [fname for fname in os.listdir(path_to_midi_files) if fname not in 'sankey bwv988 bwv232 leipzig']
+        num_tokens = 0
 
-    if all_data == False:
-        files = files[:5]
+        songs = []
+        token_dict = {}
 
-    print()
-    for i,fname in enumerate(files):
-        print('\r\r Reading file %d out of %d...' % (i+1, len(files)))
-        midi_file = midi.MidiFile()
-        midi_file.open(os.path.join(path_to_midi_files, fname), 'rb')
-        midi_file.read()
-        midi_file.close()
+        if all_data == False:
+            files = files[:5]
+        elif self.file_index >= len(files):
+            return None, None, None
+        else:
+            files = files[self.file_index : min(self.file_index + 10, len(files))]
 
-        # TODO: normalize ticks per beat
+        print()
+        for i,fname in enumerate(files):
+            print('\r\r Reading file %d out of %d...' % (i+1, len(files)))
+            midi_file = midi.MidiFile()
+            midi_file.open(os.path.join(path_to_midi_files, fname), 'rb')
+            midi_file.read()
+            midi_file.close()
 
-        # Convert midi song to a vector
-        song_vector = [] # TODO: represent each event as a one-hot, remove metadata events
-        for channel in midi_file.tracks:
-            for event in channel.events:
-                if event.type in 'NOTE_ON NOTE_OFF':
-                    song_vector.append(tokenize_event(event, token_dict))
-        songs.append(song_vector)
+            # TODO: normalize ticks per beat
 
-    print('\nUnique Tokens: %d' % len(token_dict))
-    labels = []
-    for i in range(len(songs)):
-        labels.append([x for x in songs[i]])
-        songs[i] = tf.one_hot(songs[i], len(token_dict))
+            # Convert midi song to a vector
+            song_vector = [] # TODO: represent each event as a one-hot, remove metadata events
+            for channel in midi_file.tracks:
+                for event in channel.events:
+                    if event.type in 'NOTE_ON NOTE_OFF':
+                        song_vector.append(self.tokenize_event(event, token_dict))
+            songs.append(song_vector)
 
-    return songs, labels, {token_dict[data]: data for data in token_dict}
+        print('\nUnique Tokens: %d' % len(token_dict))
+        labels = []
+        for i in range(len(songs)):
+            labels.append([x for x in songs[i]])
+            songs[i] = tf.one_hot(songs[i], len(token_dict))
+
+        return songs, labels, {token_dict[data]: data for data in token_dict}

@@ -1,13 +1,13 @@
 import tensorflow as tf
 
 class Model(tf.keras.Model):
-    def __init__(self, vocab_size, output_size):
+    def __init__(self):
         super(Model, self).__init__()
 
         # Define hyperparameters
-        self.vocab_size = vocab_size
-        self.output_size = output_size
-        self.batch_size = 64
+        self.vocab_size = 8326
+        self.output_size = 8326
+        self.batch_size = 128
 
         # Define layers
 
@@ -18,7 +18,7 @@ class Model(tf.keras.Model):
         # self.lstm2 = tf.keras.layers.LSTM(units = 100)
         self.dense = tf.keras.layers.Dense(self.vocab_size, input_shape=(100,), activation = 'softmax')
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.005)
 
     # @tf.function
     def call(self, inputs):
