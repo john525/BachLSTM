@@ -12,7 +12,7 @@ def train(model, data, labels):
         end_idx = min(i + model.batch_size, len(data))
 
         if end_idx % model.batch_size != 0:
-            return
+            return int((datetime.datetime.now() - start_time).seconds)
 
         batch_data = data[start_idx:end_idx]
         batch_labels = labels[start_idx:end_idx]
@@ -103,11 +103,14 @@ def main():
             test_labels = all_songs_labels[test_train_cutoff:]
 
             time = train(m, train_data[:-1], train_labels[1:])
+
             if time is None:
+                print('break1')
                 break
             total_time += time
 
-            if total_time >= 60*60*3:
+            if total_time >= 60*60:
+                print('break2')
                 break
 
 
