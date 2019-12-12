@@ -29,6 +29,8 @@ def train(model, data, labels):
         grad = g.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(grad, model.trainable_variables))
 
+    return int((datetime.datetime.now() - start_time).seconds)
+
 def test(model, data, labels):
     total_loss = 0.0
     n = 0.0
@@ -73,6 +75,7 @@ def main():
     elif sys.argv[1] == "SMALL":
         data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=False)
 
+    print('=== Training ===')
     if not full_dataset:
         all_songs_data = tf.concat(data, axis=0)
         all_songs_labels = tf.concat(labels, axis=0)
@@ -84,9 +87,11 @@ def main():
 
         train(m, train_data[:-1], train_labels[1:])
     else:
+        total_time = 0
         while True:
             data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
+            token_dict.delete()
             if data == None:
                 break
 
@@ -98,10 +103,10 @@ def main():
             train_labels = all_songs_labels[:test_train_cutoff]
             test_labels = all_songs_labels[test_train_cutoff:]
 
-            train(m, train_data[:-1], train_labels[1:])
-
-
-        print('=== Training ===')
+            total_time += train(m, train_data[:-1], train_labels[1:])
+            
+            if total_time >= 60*60*8:
+                break
 
 
     print('=== Testing ===')
