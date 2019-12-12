@@ -18,7 +18,7 @@ class Model(tf.keras.Model):
         # self.lstm2 = tf.keras.layers.LSTM(units = 100)
         self.dense = tf.keras.layers.Dense(self.vocab_size, input_shape=(100,), activation = 'softmax')
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.005)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
 
     # @tf.function
     def call(self, inputs):

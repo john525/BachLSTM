@@ -104,7 +104,7 @@ def main():
 
             total_time += train(m, train_data[:-1], train_labels[1:])
 
-            if total_time >= 60*60*8:
+            if total_time >= 60*60*6:
                 break
 
 
