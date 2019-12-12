@@ -35,7 +35,8 @@ class MidiLoader:
         elif self.file_index >= len(files):
             return None, None, None
         else:
-            files = files[self.file_index : min(self.file_index + 10, len(files))]
+            files = files[self.file_index : min(self.file_index + 5, len(files))]
+            self.file_index += 5
 
         print()
         for i,fname in enumerate(files):
