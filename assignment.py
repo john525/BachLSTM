@@ -32,6 +32,8 @@ def train(model, data, labels):
 def test(model, data, labels):
     total_loss = 0.0
     n = 0.0
+
+    start_time = datetime.datetime.now()
     for i in range(0, len(data), model.batch_size):
         start_idx = i
         end_idx = min(i + model.batch_size, len(data))
@@ -48,6 +50,11 @@ def test(model, data, labels):
         n += 1.0
     print('Test Loss: %f' % total_loss)
     print('Test Perp: %f' % tf.exp(total_loss / n))
+
+    seconds = int((datetime.datetime.now() - start_time).seconds)
+    minutes = int(seconds / 60)
+    seconds %= 60
+    print('Test Time: %02d:%02d' % (minutes, seconds))
 
 def main():
     small_dataset = False
