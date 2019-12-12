@@ -107,7 +107,7 @@ def main():
                 break
             total_time += time
 
-            if total_time >= 60*60*6:
+            if total_time >= 60*60*3:
                 break
 
 
