@@ -102,7 +102,10 @@ def main():
             train_labels = all_songs_labels[:test_train_cutoff]
             test_labels = all_songs_labels[test_train_cutoff:]
 
-            total_time += train(m, train_data[:-1], train_labels[1:])
+            time = train(m, train_data[:-1], train_labels[1:])
+            if time is None:
+                break
+            total_time += time
 
             if total_time >= 60*60*6:
                 break
