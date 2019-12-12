@@ -91,7 +91,6 @@ def main():
         while True:
             data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
-            token_dict.delete()
             if data == None:
                 break
 
@@ -104,7 +103,7 @@ def main():
             test_labels = all_songs_labels[test_train_cutoff:]
 
             total_time += train(m, train_data[:-1], train_labels[1:])
-            
+
             if total_time >= 60*60*8:
                 break
 
