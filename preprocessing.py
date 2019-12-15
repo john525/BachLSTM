@@ -8,8 +8,10 @@ MAX_PITCH = 128
 MAX_CHANNEL = 16
 MAX_VELOCITY = 128 # TODO: check
 
+FILE_INTERVAL = 2
+
 class MidiLoader:
-    def __init__(self):
+    def __init__(self, f_index=0):
         self.file_index = 0
 
     def tokenize_event(self, evt, token_dict):
@@ -30,12 +32,12 @@ class MidiLoader:
         token_dict = {}
 
         if all_data == False:
-            files = files[:5]
+            files = files[:FILE_INTERVAL]
         elif self.file_index >= len(files):
             return None, None, None
         else:
-            files = files[self.file_index : min(self.file_index + 5, len(files))]
-            self.file_index += 5
+            files = files[self.file_index : min(self.file_index + FILE_INTERVAL, len(files))]
+            self.file_index += FILE_INTERVAL
 
         print()
         for i,fname in enumerate(files):

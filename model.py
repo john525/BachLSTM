@@ -12,7 +12,7 @@ def get_keras_model():
     optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
     model.compile(optimizer=optimizer, loss=loss)
 
-    # model.load_weights('./weights.hdf5')
+    model.load_weights('./weights.hdf5')
 
     return model
 

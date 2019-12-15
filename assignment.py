@@ -77,16 +77,7 @@ def main():
 
     print('=== Training ===')
     if not full_dataset:
-        test_train_cutoff = int(data.shape[0] * 0.9)
-        train_data = data[:test_train_cutoff]
-        test_data = data[test_train_cutoff:]
-        train_labels = labels[:test_train_cutoff]
-        test_labels = labels[test_train_cutoff:]
-
-        train(m, train_data[:-1], train_labels[1:])
-
-        print('=== Testing ===')
-        test(m, test_data[:-1], test_labels[1:])
+        print('Not yet implemented in this branch.')
 
     else:
         total_time = 0
@@ -98,8 +89,6 @@ def main():
             if data is None:
                 break
 
-            data = data[:20]
-            labels = labels[:20]
             test_train_cutoff = int(data.shape[0] * 0.9)
             train_data = data[:test_train_cutoff]
             test_data = data[test_train_cutoff:]
@@ -108,10 +97,6 @@ def main():
 
             start_time = datetime.datetime.now()
             m.fit(train_data[:-1], train_labels[1:], batch_size=32, epochs=1, validation_data=(test_data[:-1], test_labels[1:]), callbacks=[checkpointer])
-
-            print('=== Testing ===')
-            test(m, test_data[:-1], test_labels[1:])
-            print()
 
 if __name__ == '__main__':
     main()
