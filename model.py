@@ -12,6 +12,8 @@ def get_keras_model():
     optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
     model.compile(optimizer=optimizer, loss=loss)
 
+    # model.load_weights('./weights.hdf5')
+
     return model
 
 class Model(tf.keras.Model):
@@ -21,7 +23,7 @@ class Model(tf.keras.Model):
         # Define hyperparameters
         self.vocab_size = 8326
         self.output_size = 8326
-        self.batch_size = 52
+        self.batch_size = 128
 
         # Define layers
 
@@ -32,7 +34,7 @@ class Model(tf.keras.Model):
         # self.lstm2 = tf.keras.layers.LSTM(units = 100)
         self.dense = tf.keras.layers.Dense(self.vocab_size, input_shape=(100,), activation = 'softmax')
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.0025)
 
     @tf.function
     def call(self, inputs):

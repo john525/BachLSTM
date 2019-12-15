@@ -77,12 +77,11 @@ def main():
 
     print('=== Training ===')
     if not full_dataset:
-        all_songs_labels = tf.concat(labels, axis=0)
         test_train_cutoff = int(data.shape[0] * 0.9)
         train_data = data[:test_train_cutoff]
         test_data = data[test_train_cutoff:]
-        train_labels = all_songs_labels[:test_train_cutoff]
-        test_labels = all_songs_labels[test_train_cutoff:]
+        train_labels = labels[:test_train_cutoff]
+        test_labels = labels[test_train_cutoff:]
 
         train(m, train_data[:-1], train_labels[1:])
 
@@ -91,26 +90,24 @@ def main():
 
     else:
         total_time = 0
+        checkpointer = tf.keras.callbacks.ModelCheckpoint(filepath='./weights.hdf5', verbose=1, save_best_only=True)
+
         while True:
             data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
             if data is None:
                 break
 
-            all_songs_labels = tf.concat(labels, axis=0)
+            data = data[:20]
+            labels = labels[:20]
             test_train_cutoff = int(data.shape[0] * 0.9)
             train_data = data[:test_train_cutoff]
             test_data = data[test_train_cutoff:]
-            train_labels = all_songs_labels[:test_train_cutoff]
-            test_labels = all_songs_labels[test_train_cutoff:]
+            train_labels = labels[:test_train_cutoff]
+            test_labels = labels[test_train_cutoff:]
 
             start_time = datetime.datetime.now()
-            m.fit(train_data[:-1], train_labels[1:], batch_size=32, epochs=1)
-
-            if time is None:
-                print('break1')
-                break
-            total_time += time
+            m.fit(train_data[:-1], train_labels[1:], batch_size=32, epochs=1, validation_data=(test_data[:-1], test_labels[1:]), callbacks=[checkpointer])
 
             print('=== Testing ===')
             test(m, test_data[:-1], test_labels[1:])
