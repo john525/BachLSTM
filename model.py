@@ -20,7 +20,7 @@ class Model(tf.keras.Model):
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
 
-    # @tf.function
+    @tf.function
     def call(self, inputs):
         x = self.embedding(inputs)
         x = self.lstm1(x)
@@ -28,6 +28,7 @@ class Model(tf.keras.Model):
         x = self.dense(x)
         return x
 
+    @tf.function
     def loss(self, probabilities, labels):
         y_true = labels
         y_pred = probabilities
