@@ -7,7 +7,7 @@ class Model(tf.keras.Model):
         # Define hyperparameters
         self.vocab_size = 8326
         self.output_size = 8326
-        self.batch_size = 128
+        self.batch_size = 64
 
         # Define layers
 
