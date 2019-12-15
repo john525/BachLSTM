@@ -61,6 +61,9 @@ class MidiLoader:
             labels.append([x for x in songs[i]])
             songs[i] = tf.one_hot(songs[i], len(token_dict))
 
+        songs = tf.concat(songs, axis=0)
+        labels = tf.concat(labels, axis=0)
+
         return songs, labels, {token_dict[data]: data for data in token_dict}
 
     def count_data_tokens(self, path_to_midi_files, all_data=True):

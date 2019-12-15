@@ -5,11 +5,12 @@ import sys
 import tensorflow as tf
 import datetime as datetime
 
+@tf.function
 def train(model, data, labels):
     start_time = datetime.datetime.now()
-    for i in range(0, len(data), model.batch_size):
+    for i in range(0, data.shape[0], model.batch_size):
         start_idx = i
-        end_idx = min(i + model.batch_size, len(data))
+        end_idx = min(i + model.batch_size, data.shape[0])
 
         if end_idx % model.batch_size != 0:
             return int((datetime.datetime.now() - start_time).seconds)
@@ -25,7 +26,7 @@ def train(model, data, labels):
         minutes = int(seconds / 60)
         seconds %= 60
 
-        print(' (%02d:%02d) batch %03d/%03d, loss=%07.2F' % (minutes, seconds, i / model.batch_size + 1, len(data) / model.batch_size, loss))
+        print(' (%02d:%02d) batch %03d/%03d, loss=%07.2F' % (minutes, seconds, i / model.batch_size + 1, data.shape[0] / model.batch_size, loss))
         grad = g.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(grad, model.trainable_variables))
 
@@ -36,9 +37,9 @@ def test(model, data, labels):
     n = 0.0
 
     start_time = datetime.datetime.now()
-    for i in range(0, len(data), model.batch_size):
+    for i in range(0, data.shape[0], model.batch_size):
         start_idx = i
-        end_idx = min(i + model.batch_size, len(data))
+        end_idx = min(i + model.batch_size, data.shape[0])
 
         if end_idx % model.batch_size != 0:
             break
@@ -59,7 +60,6 @@ def test(model, data, labels):
     print('Test Time: %02d:%02d' % (minutes, seconds))
 
 def main():
-    small_dataset = False
     if len(sys.argv) != 2 or sys.argv[1] not in {"BIG", "SMALL"}:
         print("USAGE: python assignment.py <Dataset>")
         print("<Dataset>: [BIG/SMALL]")
@@ -77,11 +77,10 @@ def main():
 
     print('=== Training ===')
     if not full_dataset:
-        all_songs_data = tf.concat(data, axis=0)
         all_songs_labels = tf.concat(labels, axis=0)
-        test_train_cutoff = int(len(all_songs_data) * 0.9)
-        train_data = all_songs_data[:test_train_cutoff]
-        test_data = all_songs_data[test_train_cutoff:]
+        test_train_cutoff = int(data.shape[0] * 0.9)
+        train_data = data[:test_train_cutoff]
+        test_data = data[test_train_cutoff:]
         train_labels = all_songs_labels[:test_train_cutoff]
         test_labels = all_songs_labels[test_train_cutoff:]
 
@@ -91,14 +90,13 @@ def main():
         while True:
             data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
-            if data == None:
+            if data is None:
                 break
 
-            all_songs_data = tf.concat(data, axis=0)
             all_songs_labels = tf.concat(labels, axis=0)
-            test_train_cutoff = int(len(all_songs_data) * 0.9)
-            train_data = all_songs_data[:test_train_cutoff]
-            test_data = all_songs_data[test_train_cutoff:]
+            test_train_cutoff = int(data.shape[0] * 0.9)
+            train_data = data[:test_train_cutoff]
+            test_data = data[test_train_cutoff:]
             train_labels = all_songs_labels[:test_train_cutoff]
             test_labels = all_songs_labels[test_train_cutoff:]
 
