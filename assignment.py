@@ -1,4 +1,4 @@
-from model import Model
+from model import get_keras_model
 from preprocessing import MidiLoader
 from postprocessing import unload_data
 import sys
@@ -68,7 +68,7 @@ def main():
     print('=== Bach LSTM Generator (nwee, jlhota) ===')
     full_dataset = False
     midi_loader = MidiLoader()
-    m = Model()
+    m = get_keras_model()
 
     if sys.argv[1] == "BIG":
         full_dataset = True
@@ -85,6 +85,10 @@ def main():
         test_labels = all_songs_labels[test_train_cutoff:]
 
         train(m, train_data[:-1], train_labels[1:])
+
+        print('=== Testing ===')
+        test(m, test_data[:-1], test_labels[1:])
+
     else:
         total_time = 0
         while True:
@@ -100,7 +104,8 @@ def main():
             train_labels = all_songs_labels[:test_train_cutoff]
             test_labels = all_songs_labels[test_train_cutoff:]
 
-            time = train(m, train_data[:-1], train_labels[1:])
+            start_time = datetime.datetime.now()
+            m.fit(train_data[:-1], train_labels[1:], batch_size=32, epochs=1)
 
             if time is None:
                 print('break1')
@@ -110,14 +115,6 @@ def main():
             print('=== Testing ===')
             test(m, test_data[:-1], test_labels[1:])
             print()
-
-            # if total_time >= 12*60*60:
-            #     print('break2')
-            #     break
-
-
-    print('=== Testing ===')
-    test(m, test_data[:-1], test_labels[1:])
 
 if __name__ == '__main__':
     main()

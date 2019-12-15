@@ -1,4 +1,18 @@
 import tensorflow as tf
+from tensorflow.keras import layers
+
+def get_keras_model():
+    model = tf.keras.Sequential()
+
+    model.add(layers.Embedding(input_dim = 8326, output_dim = 8326))
+    model.add(layers.LSTM(100, input_shape=(100,)))
+    model.add(layers.Dense(8326, input_shape=(100,), activation = 'softmax'))
+
+    loss = tf.keras.losses.SparseCategoricalCrossentropy()
+    optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
+    model.compile(optimizer=optimizer, loss=loss)
+
+    return model
 
 class Model(tf.keras.Model):
     def __init__(self):
