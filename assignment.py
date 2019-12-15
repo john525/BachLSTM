@@ -109,9 +109,13 @@ def main():
                 break
             total_time += time
 
-            if total_time >= 60*60:
-                print('break2')
-                break
+            print('=== Testing ===')
+            test(m, test_data[:-1], test_labels[1:])
+            print()
+
+            # if total_time >= 12*60*60:
+            #     print('break2')
+            #     break
 
 
     print('=== Testing ===')

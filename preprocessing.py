@@ -13,11 +13,10 @@ class MidiLoader:
         self.file_index = 0
 
     def tokenize_event(self, evt, token_dict):
-        one_hot = np.zeros((2, MAX_PITCH, MAX_CHANNEL, MAX_VELOCITY))
-        idx = evt.type, int(evt.pitch), int(evt.channel), int(evt.velocity)
-        if idx not in token_dict:
-            token_dict[idx] = len(token_dict)
-        return token_dict[idx]
+        b = evt.getBytes()
+        if b not in token_dict:
+            token_dict[b] = len(token_dict)
+        return token_dict[b]
 
     def load_data(self, path_to_midi_files, all_data=True):
         """
@@ -98,11 +97,11 @@ class MidiLoader:
             for channel in midi_file.tracks:
                 for event in channel.events:
                     if event.type in 'NOTE_ON NOTE_OFF':
-                        idx = event.type, int(event.pitch), int(event.channel), int(event.velocity)
-                        if idx not in token_dict:
-                            token_dict[idx] = 1
+                        bytes = event.getBytes()
+                        if bytes not in token_dict:
+                            token_dict[bytes] = 1
                         else:
-                            token_dict[idx] = 1 + token_dict[idx]
+                            token_dict[bytes] = 1 + token_dict[bytes]
 
         keys = list(token_dict.values())
         keys.sort()
