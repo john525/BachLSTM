@@ -1,88 +1,31 @@
-from model import get_keras_model
+from model import get_keras_model, loss_func
 from preprocessing import MidiLoader
 from postprocessing import unload_data
 import sys
 import tensorflow as tf
 import datetime as datetime
 
-@tf.function
-def train(model, data, labels):
-    start_time = datetime.datetime.now()
-    for i in range(0, data.shape[0], model.batch_size):
-        start_idx = i
-        end_idx = min(i + model.batch_size, data.shape[0])
-
-        if end_idx % model.batch_size != 0:
-            return int((datetime.datetime.now() - start_time).seconds)
-
-        batch_data = data[start_idx:end_idx]
-        batch_labels = labels[start_idx:end_idx]
-
-        with tf.GradientTape() as g:
-            logits = model.call(batch_data)
-            loss = model.loss(logits, batch_labels)
-
-        seconds = int((datetime.datetime.now() - start_time).seconds)
-        minutes = int(seconds / 60)
-        seconds %= 60
-
-        print(' (%02d:%02d) batch %03d/%03d, loss=%07.2F' % (minutes, seconds, i / model.batch_size + 1, data.shape[0] / model.batch_size, loss))
-        grad = g.gradient(loss, model.trainable_variables)
-        model.optimizer.apply_gradients(zip(grad, model.trainable_variables))
-
-    return int((datetime.datetime.now() - start_time).seconds)
-
-def test(model, data, labels):
-    total_loss = 0.0
-    n = 0.0
-
-    start_time = datetime.datetime.now()
-    for i in range(0, data.shape[0], model.batch_size):
-        start_idx = i
-        end_idx = min(i + model.batch_size, data.shape[0])
-
-        if end_idx % model.batch_size != 0:
-            break
-
-        batch_data = data[start_idx:end_idx]
-        batch_labels = labels[start_idx:end_idx]
-
-        logits = model.call(batch_data)
-        loss = model.loss(logits, batch_labels)
-        total_loss += loss
-        n += 1.0
-    print('Test Loss: %f' % total_loss)
-    print('Test Perp: %f' % tf.exp(total_loss / n))
-
-    seconds = int((datetime.datetime.now() - start_time).seconds)
-    minutes = int(seconds / 60)
-    seconds %= 60
-    print('Test Time: %02d:%02d' % (minutes, seconds))
-
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in {"BIG", "SMALL"}:
-        print("USAGE: python assignment.py <Dataset>")
-        print("<Dataset>: [BIG/SMALL]")
+    if len(sys.argv) < 2 or len(sys.argv) > 3 or sys.argv[1] not in {"BIG", "SMALL"}:
+        print("USAGE: python assignment.py <n>")
+        print("<n>: Start reading at file 2n")
         exit()
 
     print('=== Bach LSTM Generator (nwee, jlhota) ===')
-    full_dataset = False
     midi_loader = MidiLoader()
     m = get_keras_model()
 
-    if sys.argv[1] == "BIG":
-        full_dataset = True
-    elif sys.argv[1] == "SMALL":
-        data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=False)
+    full_dataset = True
+    if len(sys.argv) == 3:
+        midi_loader = MidiLoader(int(sys.argv[2]))
 
     print('=== Training ===')
-    if not full_dataset:
-        print('Not yet implemented in this branch.')
 
-    else:
+    if True:
         total_time = 0
         checkpointer = tf.keras.callbacks.ModelCheckpoint(filepath='./weights.hdf5', verbose=1, save_best_only=True)
 
+        batch_idx = 0
         while True:
             data, labels, token_dict = midi_loader.load_data('./data/jsbach.net/midi/', all_data=True)
 
@@ -90,13 +33,28 @@ def main():
                 break
 
             test_train_cutoff = int(data.shape[0] * 0.9)
-            train_data = data[:test_train_cutoff]
+            train_data = data[:test_train_cutoff ]
             test_data = data[test_train_cutoff:]
             train_labels = labels[:test_train_cutoff]
             test_labels = labels[test_train_cutoff:]
 
-            start_time = datetime.datetime.now()
-            m.fit(train_data[:-1], train_labels[1:], batch_size=32, epochs=1, validation_data=(test_data[:-1], test_labels[1:]), callbacks=[checkpointer])
+            def round_to_128(x):
+                new_len = len(x) - (len(x) % 128)
+                return x[:new_len + 1]
+
+            train_data = round_to_128(train_data)
+            test_data = round_to_128(test_data)
+            train_labels = round_to_128(train_labels)
+            test_labels = round_to_128(test_labels)
+
+            if batch_idx % 2 == 0:
+                m.evaluate(test_data[:-1], test_labels[1:], batch_size=128)
+            batch_idx += 1
+
+            m.fit(train_data[:-1], train_labels[1:], batch_size=128, epochs=1, validation_data=(test_data[:-1],\
+                test_labels[1:]), callbacks=[checkpointer], shuffle=False)
+
+            m.reset_states()
 
 if __name__ == '__main__':
     main()
